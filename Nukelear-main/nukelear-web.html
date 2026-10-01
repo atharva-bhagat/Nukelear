@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Nukelear Web</title>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --panel: #11151c;
+    --panel-2: #161b22;
+    --panel-3: #1c2128;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --accent: #238636;
+    --accent-dim: #1a5c30;
+    --danger: #da3633;
+    --danger-dim: #8c2b2a;
+    --warn: #d29922;
+    --warn-dim: #735c0f;
+    --font-mono: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100%;
+    line-height: 1.5;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #ffffff;
+      --panel: #f6f8fa;
+      --panel-2: #eaeef2;
+      --panel-3: #d0d7de;
+      --border: #d0d7de;
+      --text: #24292f;
+      --text-dim: #57606a;
+      --accent: #1a7f37;
+      --accent-dim: #dafbe1;
+      --danger: #cf222e;
+      --danger-dim: #ffebe9;
+      --warn: #9a6700;
+      --warn-dim: #fff8c5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a0c10; --panel: #11151c; --panel-2: #161b22; --panel-3: #1c2128; --border: #30363d;
+    --text: #c9d1d9; --text-dim: #8b949e; --accent: #238636; --accent-dim: #1a5c30;
+  }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 36px 24px 80px; }
+
+  header { margin-bottom: 36px; }
+  .brand { display: flex; align-items: center; gap: 16px; justify-content: space-between; }
+  .brand-left { display: flex; align-items: center; gap: 12px; }
+  .brand .mark {
+    width: 36px; height: 36px; border-radius: 6px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex: none;
+  }
+  h1 { font-size: 1.5rem; margin: 0; letter-spacing: -0.02em; font-weight: 600; }
+  .sub { color: var(--text-dim); font-size: 0.9rem; margin-top: 4px; line-height: 1.4; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin: 0 0 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card h2 button { font-size: 0.75rem; letter-spacing: 0.02em; }
+
+  .banner {
+    display: none;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .banner.show { display: block; }
+  .banner strong { color: var(--text); font-weight: 600; }
+  .banner.info { background: var(--panel-2); border-color: var(--border); }
+  .banner.danger { background: var(--danger-dim); border-color: var(--danger); }
+  .banner.danger strong { color: var(--danger); }
+  .banner.info strong { color: var(--accent); }
+
+  .stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .stat-pill {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; color: var(--text-dim);
+  }
+  .stat-pill b { color: var(--text); font-family: var(--font-mono); font-weight: 600; }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .tech-option {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    user-select: none;
+  }
+  .tech-option:hover { border-color: var(--accent-dim); transform: translateY(-1px); }
+  .tech-option:active { transform: translateY(0); }
+  .tech-option.checked { border-color: var(--accent); background: var(--accent-dim); }
+  .tech-option input { accent-color: var(--accent); width: 16px; height: 16px; flex: none; cursor: pointer; }
+  .tech-option .label { font-size: 0.9rem; font-weight: 500; }
+  .tech-option .dirs { display: block; font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono); margin-top: 2px; }
+
+  .btn {
+    appearance: none; border: none; border-radius: 6px;
+    padding: 10px 16px; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: all 0.15s ease;
+    font-family: var(--font-body);
+  }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #ffffff; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-dim); transform: translateY(-1px); }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
+  .btn-danger { background: var(--danger); color: #ffffff; }
+  .btn-danger:hover:not(:disabled) { background: var(--danger-dim); transform: translateY(-1px); }
+  .btn-danger:active:not(:disabled) { transform: translateY(0); }
+  .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--text-dim); background: var(--panel-2); transform: translateY(-1px); }
+  .btn-ghost:active:not(:disabled) { transform: translateY(0); }
+  .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+  .btn-row .btn-spacer { flex: 1; min-width: 8px; }
+
+  .folder-chosen {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-mono); font-size: 0.85rem;
+    background: var(--panel-2); border: 1px solid var(--accent-dim);
+    border-radius: 4px; padding: 12px 16px; margin-top: 16px;
+    color: var(--text); word-break: break-all;
+  }
+
+  .status-line { display: flex; align-items: center; gap: 10px; color: var(--text-dim); font-size: 0.85rem; margin-top: 16px; }
+  .status-line.success { color: var(--accent); }
+  .status-line.error { color: var(--danger); }
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite; flex: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-list { display: flex; flex-direction: column; gap: 4px; margin-top: 16px; max-height: 400px; overflow-y: auto; padding-right: 4px; }
+  .result-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 10px 12px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .result-item:hover { border-color: var(--text-dim); background: var(--panel-3); }
+  .result-item input[type="checkbox"] { accent-color: var(--danger); width: 16px; height: 16px; flex: none; cursor: pointer; }
+  .result-item .path { font-family: var(--font-mono); font-size: 0.82rem; word-break: break-all; flex: 1; }
+  .result-item .path .base { color: var(--text); font-weight: 500; }
+  .result-item .path .dir { color: var(--text-dim); }
+  .result-item .size { font-size: 0.76rem; color: var(--text-dim); font-family: var(--font-mono); flex: none; }
+  .icon-btn {
+    appearance: none; border: 1px solid var(--border); background: var(--panel-3);
+    color: var(--text-dim); border-radius: 4px; width: 28px; height: 28px; flex: none;
+    cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--accent-dim); background: var(--panel-2); transform: translateY(-1px); }
+  .icon-btn:active { transform: translateY(0); }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .badge { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 999px; flex: none; }
+  .badge-warn { background: var(--warn-dim); color: var(--warn); }
+  .badge-muted { background: var(--panel-3); color: var(--text-dim); }
+
+  .empty-note { color: var(--text-dim); font-size: 0.9rem; margin-top: 16px; font-style: italic; }
+
+  .summary { font-size: 0.9rem; }
+  .summary .big { font-size: 1.8rem; font-weight: 600; color: var(--accent); letter-spacing: -0.02em; }
+  .log { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+  .log-line { font-family: var(--font-mono); font-size: 0.82rem; display: flex; gap: 8px; align-items: flex-start; }
+  .log-line .ok { color: var(--accent); flex: none; }
+  .log-line .err { color: var(--danger); flex: none; }
+  .log-line .info { color: var(--text-dim); flex: none; }
+  .log-line .path { word-break: break-all; color: var(--text-dim); }
+
+  .results-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 4px; margin-bottom: 12px;
+  }
+  .results-header .count { font-size: 0.85rem; color: var(--text-dim); }
+  .results-header .count b { color: var(--text); font-weight: 600; }
+  .results-header .size { font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.02em; }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: none; align-items: center; justify-content: center;
+    z-index: 50; padding: 20px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px; max-width: 600px; width: 100%;
+    max-height: 85vh; display: flex; flex-direction: column;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  }
+  .modal h3 { margin: 0 0 12px; font-size: 1.1rem; word-break: break-all; font-weight: 600; }
+  .modal p { color: var(--text-dim); font-size: 0.9rem; margin: 0 0 20px; line-height: 1.5; }
+  .modal .btn-row { margin-top: 20px; }
+  .modal-body { overflow-y: auto; }
+  .type-confirm-input {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px 14px; color: var(--text); font-size: 0.95rem;
+    font-family: var(--font-mono);
+  }
+  .type-confirm-input:focus { outline: none; border-color: var(--danger); box-shadow: 0 0 0 3px rgba(218, 54, 51, 0.1); }
+
+  .preview-pre {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px; font-family: var(--font-mono); font-size: 0.78rem; white-space: pre-wrap;
+    word-break: break-all; margin: 0;
+  }
+  .preview-list { list-style: none; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 0.82rem; }
+  .preview-list li { padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .preview-list li:last-child { border-bottom: none; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
+  footer code { font-family: var(--font-mono); background: var(--panel-2); padding: 3px 8px; border-radius: 4px; }
+
+  .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent-dim); color: var(--accent);
+    font-size: 0.75rem; font-weight: 600; margin-right: 10px;
+  }
+
+  .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    appearance: none; background: transparent; border: none; cursor: pointer;
+    padding: 12px 20px; font-size: 0.9rem; font-weight: 500; color: var(--text-dim);
+    border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: var(--font-body);
+    display: flex; align-items: center; gap: 8px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .count-chip {
+    background: var(--panel-3); color: var(--text-dim); font-size: 0.7rem;
+    border-radius: 999px; padding: 2px 8px; font-weight: 600;
+  }
+  .tab-btn.active .count-chip { background: var(--accent-dim); color: var(--accent); }
+
+  label.field { display: block; margin-bottom: 16px; }
+  label.field span.field-label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 500; }
+  .field input[type="text"], .field input[type="password"] {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px 12px; color: var(--text); font-size: 0.9rem;
+    font-family: var(--font-mono);
+  }
+  .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1); }
+  .field-hint { font-size: 0.8rem; color: var(--text-dim); margin-top: 6px; line-height: 1.4; }
+  .field-row { display: flex; gap: 12px; }
+  .field-row .field { flex: 1; }
+
+  .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .filter-row input { flex: 1; }
+
+  .file-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; border-radius: 6px;
+    transition: background 0.15s ease;
+  }
+  .file-row:hover { background: var(--panel-2); }
+  .file-row input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; flex: none; cursor: pointer; }
+  .file-row .path { font-family: var(--font-mono); font-size: 0.8rem; flex: 1; word-break: break-all; }
+
+  .trash-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 12px 14px; margin-bottom: 8px;
+    transition: border-color 0.15s ease;
+  }
+  .trash-item:hover { border-color: var(--text-dim); }
+  .trash-item .meta { flex: 1; min-width: 0; }
+  .trash-item .meta .path { font-family: var(--font-mono); font-size: 0.82rem; word-break: break-all; }
+  .trash-item .meta .when { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+  .trash-item .actions { display: flex; gap: 6px; flex: none; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); }
+  .empty-state .glyph { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.7; }
+  .empty-state .text { font-size: 0.9rem; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 24px 16px 60px; }
+    .brand-left { gap: 12px; }
+    h1 { font-size: 1.4rem; }
+    .sub { font-size: 0.85rem; }
+    .card { padding: 18px; }
+    .tech-grid { grid-template-columns: 1fr; }
+    .btn-row { flex-direction: column; align-items: stretch; }
+    .btn-row .btn { width: 100%; }
+    .btn-row .btn-spacer { display: none; }
+    .field-row { flex-direction: column; gap: 16px; }
+    .tabs { overflow-x: auto; }
+    .tab-btn { padding: 12px 16px; white-space: nowrap; }
+    .results-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .result-item { padding: 10px; }
+    .icon-btn { width: 32px; height: 32px; }
+    .modal { padding: 20px; max-width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transform: none !important;
+    }
+  }
+
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-left">
+        <div class="mark">⚛️</div>
+        <div>
+          <h1>Nukelear</h1>
+          <div class="sub">Clean the clutter. Keep the project.</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="banner danger" id="compat-banner">
+    <strong>Browser not supported.</strong> Nukelear Web needs the File System Access API, which only works in Chrome, Edge, Brave, or Opera on desktop. Please open this page in one of those browsers.
+  </div>
+
+  <div class="card">
+    <h2>Select Project Folder</h2>
+    <p style="color: var(--text-dim); font-size: 0.9rem; margin: 0 0 20px; line-height: 1.5;">Scan your project for build artifacts, dependencies and development clutter.</p>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" id="pick-folder-btn">Select Project Folder</button>
+      <button class="btn btn-ghost" id="rescan-btn" style="display:none;">Rescan</button>
+    </div>
+    <div class="folder-chosen" id="folder-chosen" style="display:none;"></div>
+    <div class="status-line" id="size-status" style="display:none;">
+      <div class="spinner"></div>
+      <span id="size-status-text">Calculating project size…</span>
+    </div>
+    <div class="stat-row" id="project-stats" style="display:none;">
+      <div class="stat-pill">Project size: <b id="project-size-val">—</b></div>
+    </div>
+  </div>
+
+  <div id="app-tabs" style="display:none;">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="clean">Clean</button>
+      <button class="tab-btn" data-tab="trash">Recycle Bin <span class="count-chip" id="trash-count-chip">0</span></button>
+      <button class="tab-btn" data-tab="github">GitHub Upload</button>
+    </div>
+
+    <!-- CLEAN TAB -->
+    <div class="tab-panel active" id="tab-clean">
+      <div class="card">
+        <h2>Choose Technologies to Clean</h2>
+        <div class="tech-grid" id="tech-grid"></div>
+      </div>
+
+      <div class="status-line" id="scan-status" style="display:none;">
+        <div class="spinner"></div>
+        <span id="scan-status-text">Scanning…</span>
+      </div>
+
+      <div class="card" id="results-card" style="display:none;">
+        <h2>Select Items to Remove</h2>
+        <div class="results-header" id="results-header" style="display:none;">
+          <div class="count"><b id="results-count">0</b> items found</div>
+          <div class="size" id="results-size">0 MB reclaimable</div>
+        </div>
+        <div id="results-list" class="result-list"></div>
+        <div id="empty-note" class="empty-note" style="display:none;">No clutter found for the selected technologies.</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" id="select-all-results" style="display:none;">Select All</button>
+          <button class="btn btn-ghost btn-sm" id="clear-selection" style="display:none;">Clear Selection</button>
+          <div class="btn-spacer"></div>
+          <button class="btn btn-danger" id="nuke-btn" disabled>Move to Recycle Bin (0)</button>
+        </div>
+        <div class="field-hint" style="margin-top:12px;">Items are moved to the Recycle Bin first so you can restore them if needed.</div>
+      </div>
+
+      <div class="card" id="summary-card" style="display:none;">
+        <h2>Cleanup Complete</h2>
+        <div class="summary">
+          <div>Freed <span class="big" id="freed-size">0 MB</span> across <span id="freed-count">0</span> item(s)</div>
+          <div class="stat-row">
+            <div class="stat-pill">Before: <b id="size-before-val">—</b></div>
+            <div class="stat-pill">After: <b id="size-after-val">—</b></div>
+          </div>
+          <div class="log" id="result-log"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECYCLE BIN TAB -->
+    <div class="tab-panel" id="tab-trash">
+      <div class="card">
+        <h2>
+          Recycle Bin
+          <button class="btn btn-ghost btn-sm" id="empty-trash-btn">Empty Recycle Bin</button>
+        </h2>
+        <div id="trash-list"></div>
+        <div class="empty-state" id="trash-empty-state">
+          <div class="glyph">🗑️</div>
+          <div class="text">Recycle Bin is empty</div>
+        </div>
+      </div>
+      <div class="field-hint">Items are moved to a hidden <code>.nukelear-trash</code> folder in your project until you restore or permanently delete them.</div>
+    </div>
+
+    <!-- GITHUB UPLOAD TAB -->
+    <div class="tab-panel" id="tab-github">
+      <div class="card">
+        <h2>GitHub Repository</h2>
+        <label class="field">
+          <span class="field-label">Personal Access Token</span>
+          <input type="password" id="gh-token" placeholder="ghp_… or github_pat_…" autocomplete="off" />
+          <div class="field-hint">Used only in your browser to call GitHub's API directly. Use a fine-grained token scoped to this repo's "Contents: Read and write" permission.</div>
+        </label>
+        <label class="field">
+          <span class="field-label">Repository URL</span>
+          <input type="text" id="gh-repo-url" placeholder="https://github.com/your-name/your-repo" />
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">Branch</span>
+            <input type="text" id="gh-branch" value="main" />
+          </label>
+          <label class="field">
+            <span class="field-label">Commit message</span>
+            <input type="text" id="gh-message" value="Upload via Nukelear Web" />
+          </label>
+        </div>
+        <div class="banner info show">
+          <strong>Info:</strong> The target branch must already exist with at least one commit. Nukelear Web commits on top of it — it doesn't initialize empty repos.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Select Files to Upload</h2>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn btn-primary" id="gh-scan-btn">Scan Project Files</button>
+        </div>
+        <div class="status-line" id="gh-scan-status" style="display:none;">
+          <div class="spinner"></div>
+          <span id="gh-scan-status-text">Scanning files…</span>
+        </div>
+        <div id="gh-files-section" style="display:none;">
+          <div class="filter-row">
+            <input type="text" id="gh-filter" placeholder="Filter files by name or path… (e.g. .env, config)" />
+            <button class="btn btn-ghost btn-sm" id="gh-select-all">All</button>
+            <button class="btn btn-ghost btn-sm" id="gh-select-none">None</button>
+          </div>
+          <div class="banner show danger" style="margin-top:12px;" id="gh-sensitive-banner">
+            <strong>⚠️ Security:</strong> Files that look like secrets or API keys are unchecked automatically. Review the list before uploading.
+          </div>
+          <div class="result-list" id="gh-file-list" style="max-height: 320px;"></div>
+          <div class="stat-row">
+            <div class="stat-pill"><b id="gh-selected-count">0</b> selected</div>
+            <div class="stat-pill"><b id="gh-total-count">0</b> total</div>
+            <div class="stat-pill"><b id="gh-flagged-count">0</b> flagged</div>
+            <div class="stat-pill"><b id="gh-content-flagged-count">0</b> content</div>
+            <div class="stat-pill"><b id="gh-edited-count">0</b> edited</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="gh-upload-card" style="display:none;">
+        <h2>Upload to GitHub</h2>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn btn-primary" id="gh-upload-btn" disabled>Upload Selected Files</button>
+        </div>
+        <div class="log" id="gh-log"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Everything runs locally in your browser. Files are only uploaded to GitHub when you explicitly use the Upload tab with your own token.
+  </footer>
+</div>
+
+<!-- Type-to-confirm modal (used for nuking and emptying the recycle bin) -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal">
+    <h3 id="confirm-title">Are you sure?</h3>
+    <p id="confirm-text">This will permanently delete the selected items. This cannot be undone.</p>
+    <input type="text" class="type-confirm-input" id="confirm-input" placeholder='Type "delete" to confirm' autocomplete="off" />
+    <div class="btn-row">
+      <button class="btn btn-danger" id="confirm-yes" disabled>Confirm</button>
+      <button class="btn btn-ghost" id="confirm-no">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview modal -->
+<div class="modal-backdrop" id="preview-modal">
+  <div class="modal">
+    <h3 id="preview-title">Preview</h3>
+    <div class="modal-body" id="preview-body">Loading…</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="preview-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit File modal (used from the GitHub Upload tab to strip secrets/credentials before uploading) -->
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal" style="max-width: 640px;">
+    <h3 id="edit-title">Edit file</h3>
+    <p id="edit-subtitle">Remove or change anything here — this only affects what gets uploaded to GitHub, not your local file, unless you choose to save it below.</p>
+    <div class="modal-body">
+      <div id="edit-flags"></div>
+      <textarea id="edit-textarea" class="type-confirm-input" style="width:100%; min-height: 260px; resize: vertical; white-space: pre; overflow-wrap: normal; overflow-x: auto;" spellcheck="false"></textarea>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:0.82rem; color: var(--text-dim);">
+        <input type="checkbox" id="edit-save-local" style="width:15px; height:15px; accent-color: var(--accent);" />
+        Also overwrite my local file with these changes
+      </label>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-danger btn-sm" id="edit-redact-all">Redact All Detected</button>
+      <button class="btn btn-ghost btn-sm" id="edit-reset">Reset to Original</button>
+      <button class="btn btn-primary" id="edit-save">Save Changes</button>
+      <button class="btn btn-ghost" id="edit-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CONFIG = [
+  { name: 'Python', value: 'python', directories: ['venv', '.venv', '__pycache__'] },
+  { name: 'Node.js', value: 'node', directories: ['node_modules', 'dist', 'build'] },
+  { name: 'Next.js', value: 'next', directories: ['node_modules', '.next', 'dist', 'build'] },
+  { name: 'VS Code', value: 'vscode', directories: ['.vscode'] },
+  { name: 'macOS', value: 'macos', directories: ['.DS_Store'] },
+];
+const SKIP_DIRS = new Set(['.git', '.nukelear-trash']);
+const TRASH_DIR_NAME = '.nukelear-trash';
+const TRASH_INDEX_FILE = 'index.json';
+
+const IGNORE_DIR_NAMES = new Set([
+  'node_modules', '.git', '.next', 'dist', 'build', 'venv', '.venv',
+  '__pycache__', '.nukelear-trash', 'coverage', '.cache', '.turbo', '.vscode',
+]);
+const IGNORE_FILE_NAMES = new Set(['.DS_Store']);
+const SENSITIVE_PATTERNS = [
+  /^\.env(\..*)?$/i,
+  /secrets?\.(json|ya?ml|env|js|ts)$/i,
+  /credentials?\.(json|ya?ml)$/i,
+  /\.pem$/i,
+  /\.key$/i,
+  /^id_rsa$/i,
+  /^id_ed25519$/i,
+  /api[_-]?keys?\.(json|ya?ml|js|ts|env)$/i,
+  /api[_-]?key/i,
+  /^\.npmrc$/i,
+  /^\.pgpass$/i,
+  /service[-_]?account.*\.json$/i,
+  /^\.aws$/i,
+];
+
+function isSensitiveName(name) {
+  return SENSITIVE_PATTERNS.some(re => re.test(name));
+}
+
+/* Line-level content patterns: catches hardcoded credentials/API keys that
+   live inside otherwise ordinary-looking files (e.g. a seed script with an
+   admin email + password, or a config.js with an API key baked in). Each
+   pattern also knows how to redact just the secret part of a matching line. */
+const CONTENT_SECRET_PATTERNS = [
+  {
+    label: 'AWS access key',
+    test: line => /AKIA[0-9A-Z]{16}/.test(line),
+    redact: line => line.replace(/AKIA[0-9A-Z]{16}/g, '[REDACTED_AWS_KEY]'),
+  },
+  {
+    label: 'Private key block',
+    test: line => /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(line),
+    redact: () => '[REDACTED PRIVATE KEY LINE]',
+  },
+  {
+    label: 'JWT-looking token',
+    test: line => /eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/.test(line),
+    redact: line => line.replace(/eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/g, '[REDACTED_JWT]'),
+  },
+  {
+    label: 'Credential in connection string',
+    test: line => /:\/\/[^:\s/]+:[^@\s/]+@/.test(line),
+    redact: line => line.replace(/:\/\/[^:\s/]+:[^@\s/]+@/, '://[REDACTED]:[REDACTED]@'),
+  },
+  {
+    label: 'API key / access token',
+    test: line => /(api[_-]?key|apikey|access[_-]?token|auth[_-]?token)\s*[:=]\s*['"][A-Za-z0-9_\-.]{10,}['"]/i.test(line),
+    redact: line => line.replace(/(['"])[A-Za-z0-9_\-.]{10,}(['"])/, '$1[REDACTED]$2'),
+  },
+  {
+    label: 'Secret assignment',
+    test: line => /\bsecret\b\s*[:=]\s*['"][A-Za-z0-9_\-.]{6,}['"]/i.test(line),
+    redact: line => line.replace(/(['"])[A-Za-z0-9_\-.]{6,}(['"])/, '$1[REDACTED]$2'),
+  },
+  {
+    label: 'Password assignment',
+    test: line => /(password|passwd|pwd)\s*[:=]\s*['"][^'"]{3,}['"]/i.test(line),
+    redact: line => line.replace(/(['"])[^'"]{3,}(['"])/, '$1[REDACTED]$2'),
+  },
+  {
+    label: 'Hardcoded admin/login credential',
+    test: line => /(admin|root|default)[_-]?(email|user|username|login)\s*[:=]\s*['"][^'"]+['"]/i.test(line),
+    redact: line => line.replace(/(['"])[^'"]+(['"])/, '$1[REDACTED]$2'),
+  },
+  {
+    label: '.env-style secret',
+    test: line => /^(?:[A-Z0-9]+_)*?(SECRET|TOKEN|API_KEY|PASSWORD)[A-Z0-9_]*\s*=\s*\S+/.test(line.trim()) && !line.trim().startsWith('#'),
+    redact: line => line.replace(/=(.*)$/, '=[REDACTED]'),
+  },
+];
+
+/** Run every content pattern over a block of text, line by line. */
+function findContentSecrets(text) {
+  const lines = text.split('\n');
+  const matches = [];
+  lines.forEach((line, idx) => {
+    for (const pattern of CONTENT_SECRET_PATTERNS) {
+      if (pattern.test(line)) {
+        matches.push({ lineNum: idx + 1, label: pattern.label });
+        break; // one flag per line is enough to alert the user
+      }
+    }
+  });
+  return matches;
+}
+
+/** Apply every matching pattern's redaction to a block of text. */
+function redactAllContentSecrets(text) {
+  return text
+    .split('\n')
+    .map(line => {
+      for (const pattern of CONTENT_SECRET_PATTERNS) {
+        if (pattern.test(line)) return pattern.redact(line);
+      }
+      return line;
+    })
+    .join('\n');
+}
+
+const MAX_SCANNABLE_FILE_SIZE = 300000; // 300 KB — larger files skip content scanning
+
+/** Read a file handle's text if it's a reasonably small, non-binary file. */
+async function readTextIfScannable(handle) {
+  const file = await handle.getFile();
+  if (file.size > MAX_SCANNABLE_FILE_SIZE) return { text: null, tooLarge: true, binary: false };
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const isBinary = buf.subarray(0, 1000).some(b => b === 0);
+  if (isBinary) return { text: null, tooLarge: false, binary: true };
+  return { text: new TextDecoder().decode(buf), tooLarge: false, binary: false };
+}
+
+function textToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+// path -> edited text the user has saved through the file editor; these
+// overrides are what actually get uploaded for that file, in place of the
+// original content on disk.
+const editedContents = new Map();
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[ch]));
+}
+
+function formatSize(bytes) {
+  if (!bytes || bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let i = 0, val = bytes;
+  while (val >= 1024 && i < units.length - 1) { val /= 1024; i++; }
+  return `${val.toFixed(val >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Element references                                                     */
+/* ---------------------------------------------------------------------- */
+const techGrid = document.getElementById('tech-grid');
+const compatBanner = document.getElementById('compat-banner');
+const pickBtn = document.getElementById('pick-folder-btn');
+const rescanBtn = document.getElementById('rescan-btn');
+const folderChosenEl = document.getElementById('folder-chosen');
+const sizeStatus = document.getElementById('size-status');
+const sizeStatusText = document.getElementById('size-status-text');
+const projectStats = document.getElementById('project-stats');
+const projectSizeVal = document.getElementById('project-size-val');
+const appTabs = document.getElementById('app-tabs');
+
+const scanStatus = document.getElementById('scan-status');
+const scanStatusText = document.getElementById('scan-status-text');
+const resultsCard = document.getElementById('results-card');
+const resultsList = document.getElementById('results-list');
+const emptyNote = document.getElementById('empty-note');
+const nukeBtn = document.getElementById('nuke-btn');
+const summaryCard = document.getElementById('summary-card');
+const freedSizeEl = document.getElementById('freed-size');
+const freedCountEl = document.getElementById('freed-count');
+const sizeBeforeVal = document.getElementById('size-before-val');
+const sizeAfterVal = document.getElementById('size-after-val');
+const resultLog = document.getElementById('result-log');
+
+const confirmModal = document.getElementById('confirm-modal');
+const confirmTitle = document.getElementById('confirm-title');
+const confirmText = document.getElementById('confirm-text');
+const confirmInput = document.getElementById('confirm-input');
+const confirmYes = document.getElementById('confirm-yes');
+const confirmNo = document.getElementById('confirm-no');
+
+const previewModal = document.getElementById('preview-modal');
+const previewTitle = document.getElementById('preview-title');
+const previewBody = document.getElementById('preview-body');
+const previewClose = document.getElementById('preview-close');
+
+const trashList = document.getElementById('trash-list');
+const trashEmptyState = document.getElementById('trash-empty-state');
+const trashCountChip = document.getElementById('trash-count-chip');
+const emptyTrashBtn = document.getElementById('empty-trash-btn');
+
+const ghTokenInput = document.getElementById('gh-token');
+const ghRepoUrlInput = document.getElementById('gh-repo-url');
+const ghBranchInput = document.getElementById('gh-branch');
+const ghMessageInput = document.getElementById('gh-message');
+const ghScanBtn = document.getElementById('gh-scan-btn');
+const ghScanStatus = document.getElementById('gh-scan-status');
+const ghFilesSection = document.getElementById('gh-files-section');
+const ghFilter = document.getElementById('gh-filter');
+const ghSelectAll = document.getElementById('gh-select-all');
+const ghSelectNone = document.getElementById('gh-select-none');
+const ghFileList = document.getElementById('gh-file-list');
+const ghSelectedCount = document.getElementById('gh-selected-count');
+const ghTotalCount = document.getElementById('gh-total-count');
+const ghFlaggedCount = document.getElementById('gh-flagged-count');
+const ghUploadCard = document.getElementById('gh-upload-card');
+const ghUploadBtn = document.getElementById('gh-upload-btn');
+const ghLog = document.getElementById('gh-log');
+const ghContentFlaggedCount = document.getElementById('gh-content-flagged-count');
+const ghEditedCount = document.getElementById('gh-edited-count');
+const ghScanStatusText = document.getElementById('gh-scan-status-text');
+
+const editModal = document.getElementById('edit-modal');
+const editTitle = document.getElementById('edit-title');
+const editFlags = document.getElementById('edit-flags');
+const editTextarea = document.getElementById('edit-textarea');
+const editSaveLocal = document.getElementById('edit-save-local');
+const editRedactAllBtn = document.getElementById('edit-redact-all');
+const editResetBtn = document.getElementById('edit-reset');
+const editSaveBtn = document.getElementById('edit-save');
+const editCancelBtn = document.getElementById('edit-cancel');
+
+let rootHandle = null;
+let matches = []; // { parentHandle, name, kind, path, size, handle }
+let uploadFiles = []; // { handle, path, name, sensitive, selected }
+
+/* ---------------------------------------------------------------------- */
+/* Tabs                                                                    */
+/* ---------------------------------------------------------------------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+    if (btn.dataset.tab === 'trash') refreshTrashView();
+  });
+});
+
+/* ---------------------------------------------------------------------- */
+/* Recursive helpers over the File System Access API                      */
+/* ---------------------------------------------------------------------- */
+async function getHandleSize(handle) {
+  if (handle.kind === 'file') {
+    try {
+      const file = await handle.getFile();
+      return file.size;
+    } catch { return 0; }
+  }
+  let total = 0;
+  try {
+    for await (const [name, child] of handle.entries()) {
+      if (SKIP_DIRS.has(name)) continue;
+      total += await getHandleSize(child);
+    }
+  } catch { /* permission or race errors: ignore */ }
+  return total;
+}
+
+async function copyRecursive(srcHandle, destParentHandle, name) {
+  if (srcHandle.kind === 'file') {
+    const file = await srcHandle.getFile();
+    const destFileHandle = await destParentHandle.getFileHandle(name, { create: true });
+    const writable = await destFileHandle.createWritable();
+    await writable.write(file);
+    await writable.close();
+  } else {
+    const destDirHandle = await destParentHandle.getDirectoryHandle(name, { create: true });
+    for await (const [childName, childHandle] of srcHandle.entries()) {
+      await copyRecursive(childHandle, destDirHandle, childName);
+    }
+  }
+}
+
+async function ensureDirPath(root, segments) {
+  let cur = root;
+  for (const seg of segments) {
+    if (!seg) continue;
+    cur = await cur.getDirectoryHandle(seg, { create: true });
+  }
+  return cur;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Recycle bin (implemented as a hidden .nukelear-trash folder + index)    */
+/* ---------------------------------------------------------------------- */
+async function getTrashRootHandle() {
+  return rootHandle.getDirectoryHandle(TRASH_DIR_NAME, { create: true });
+}
+
+async function loadTrashIndex(trashRoot) {
+  try {
+    const fh = await trashRoot.getFileHandle(TRASH_INDEX_FILE);
+    const file = await fh.getFile();
+    const text = await file.text();
+    return text ? JSON.parse(text) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveTrashIndex(trashRoot, index) {
+  const fh = await trashRoot.getFileHandle(TRASH_INDEX_FILE, { create: true });
+  const writable = await fh.createWritable();
+  await writable.write(JSON.stringify(index, null, 2));
+  await writable.close();
+}
+
+async function moveToTrash(match) {
+  const trashRoot = await getTrashRootHandle();
+  const index = await loadTrashIndex(trashRoot);
+  const id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  await copyRecursive(match.handle, trashRoot, id);
+  await match.parentHandle.removeEntry(match.name, { recursive: true });
+  index.push({
+    id,
+    name: match.name,
+    kind: match.kind,
+    originalPath: match.path,
+    size: match.size || 0,
+    deletedAt: new Date().toISOString(),
+  });
+  await saveTrashIndex(trashRoot, index);
+}
+
+async function restoreTrashEntry(entry) {
+  const trashRoot = await getTrashRootHandle();
+  const index = await loadTrashIndex(trashRoot);
+  const srcHandle = entry.kind === 'file'
+    ? await trashRoot.getFileHandle(entry.id)
+    : await trashRoot.getDirectoryHandle(entry.id);
+
+  const parts = entry.originalPath.split('/');
+  parts.pop(); // drop the item's own name
+  parts.shift(); // drop the root folder's display name
+  const destParent = await ensureDirPath(rootHandle, parts);
+  await copyRecursive(srcHandle, destParent, entry.name);
+  await trashRoot.removeEntry(entry.id, { recursive: true });
+  await saveTrashIndex(trashRoot, index.filter(e => e.id !== entry.id));
+}
+
+async function deleteTrashEntryPermanently(entry) {
+  const trashRoot = await getTrashRootHandle();
+  const index = await loadTrashIndex(trashRoot);
+  await trashRoot.removeEntry(entry.id, { recursive: true });
+  await saveTrashIndex(trashRoot, index.filter(e => e.id !== entry.id));
+}
+
+async function emptyTrashCompletely() {
+  try {
+    await rootHandle.removeEntry(TRASH_DIR_NAME, { recursive: true });
+  } catch { /* already empty / doesn't exist */ }
+}
+
+async function refreshTrashView() {
+  if (!rootHandle) return;
+  let index = [];
+  try {
+    const trashRoot = await getTrashRootHandle();
+    index = await loadTrashIndex(trashRoot);
+  } catch { /* ignore */ }
+
+  trashCountChip.textContent = String(index.length);
+  trashList.innerHTML = '';
+  trashEmptyState.style.display = index.length === 0 ? 'block' : 'none';
+
+  index.slice().reverse().forEach(entry => {
+    const row = document.createElement('div');
+    row.className = 'trash-item';
+    row.innerHTML = `
+      <span style="font-size:1.1rem;">${entry.kind === 'file' ? '📄' : '📁'}</span>
+      <div class="meta">
+        <div class="path">${escapeHtml(entry.originalPath)}</div>
+        <div class="when">${formatSize(entry.size)} · deleted ${new Date(entry.deletedAt).toLocaleString()}</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost btn-sm" data-action="restore">Restore</button>
+        <button class="btn btn-danger btn-sm" data-action="delete">Delete Forever</button>
+      </div>
+    `;
+    row.querySelector('[data-action="restore"]').addEventListener('click', async () => {
+      try {
+        await restoreTrashEntry(entry);
+        await refreshTrashView();
+        await refreshProjectSize();
+        if (rootHandle) await runScan();
+      } catch (err) {
+        alert(`Could not restore: ${err.message}`);
+      }
+    });
+    row.querySelector('[data-action="delete"]').addEventListener('click', () => {
+      openConfirmModal({
+        title: 'Delete forever?',
+        text: `This permanently deletes "${entry.originalPath}" from the Recycle Bin. This cannot be undone.`,
+        onConfirm: async () => {
+          await deleteTrashEntryPermanently(entry);
+          await refreshTrashView();
+        },
+      });
+    });
+    trashList.appendChild(row);
+  });
+}
+
+emptyTrashBtn.addEventListener('click', () => {
+  openConfirmModal({
+    title: 'Empty the Recycle Bin?',
+    text: 'This permanently deletes everything currently in the Recycle Bin. This cannot be undone.',
+    onConfirm: async () => {
+      await emptyTrashCompletely();
+      await refreshTrashView();
+    },
+  });
+});
+
+/* ---------------------------------------------------------------------- */
+/* Type-to-confirm modal (generic, reused across destructive actions)      */
+/* ---------------------------------------------------------------------- */
+let pendingConfirmAction = null;
+
+function openConfirmModal({ title, text, onConfirm }) {
+  confirmTitle.textContent = title;
+  confirmText.textContent = text;
+  confirmInput.value = '';
+  confirmYes.disabled = true;
+  pendingConfirmAction = onConfirm;
+  confirmModal.classList.add('show');
+  setTimeout(() => confirmInput.focus(), 30);
+}
+
+confirmInput.addEventListener('input', () => {
+  confirmYes.disabled = confirmInput.value.trim().toLowerCase() !== 'delete';
+});
+
+confirmNo.addEventListener('click', () => {
+  confirmModal.classList.remove('show');
+  pendingConfirmAction = null;
+});
+
+confirmYes.addEventListener('click', async () => {
+  if (confirmInput.value.trim().toLowerCase() !== 'delete') return;
+  const action = pendingConfirmAction;
+  confirmModal.classList.remove('show');
+  pendingConfirmAction = null;
+  if (action) await action();
+});
+
+/* ---------------------------------------------------------------------- */
+/* Preview modal                                                          */
+/* ---------------------------------------------------------------------- */
+previewClose.addEventListener('click', () => previewModal.classList.remove('show'));
+
+async function openPreview(match) {
+  previewTitle.textContent = match.path;
+  previewBody.innerHTML = 'Loading…';
+  previewModal.classList.add('show');
+
+  if (match.kind === 'file') {
+    try {
+      const file = await match.handle.getFile();
+      const size = formatSize(file.size);
+      const ext = match.path.split('.').pop().toLowerCase();
+
+      // Build metadata header
+      const metadata = document.createElement('div');
+      metadata.style.cssText = 'margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);';
+      metadata.innerHTML = `
+        <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px;">${match.path}</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">
+          <span style="font-family: var(--font-mono);">${size}</span>
+          ${ext ? ` • <span style="font-family: var(--font-mono);">${ext.toUpperCase()}</span>` : ''}
+        </div>
+      `;
+      previewBody.innerHTML = '';
+      previewBody.appendChild(metadata);
+
+      // Check size limit (100KB for preview)
+      const MAX_PREVIEW_SIZE = 100000;
+      if (file.size > MAX_PREVIEW_SIZE) {
+        const warning = document.createElement('div');
+        warning.style.cssText = 'color: var(--text-dim); font-size: 0.85rem; font-style: italic;';
+        warning.textContent = `File is ${size} — too large to preview. Only files under ${formatSize(MAX_PREVIEW_SIZE)} can be previewed for safety.`;
+        previewBody.appendChild(warning);
+        return;
+      }
+
+      const buf = new Uint8Array(await file.arrayBuffer());
+      const isBinary = buf.subarray(0, 1000).some(b => b === 0);
+      if (isBinary) {
+        const warning = document.createElement('div');
+        warning.style.cssText = 'color: var(--text-dim); font-size: 0.85rem; font-style: italic;';
+        warning.textContent = `Binary or unsupported file (${size}) — contents cannot be previewed for safety.`;
+        previewBody.appendChild(warning);
+      } else {
+        const text = new TextDecoder().decode(buf);
+        const pre = document.createElement('pre');
+        pre.className = 'preview-pre';
+        pre.style.cssText = 'max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;';
+        pre.textContent = text;
+        previewBody.appendChild(pre);
+
+        if (text.length > 10000) {
+          const truncation = document.createElement('div');
+          truncation.style.cssText = 'color: var(--text-dim); font-size: 0.75rem; margin-top: 8px; font-style: italic;';
+          truncation.textContent = `Showing first 10,000 characters — file is ${size} total`;
+          previewBody.appendChild(truncation);
+        }
+      }
+    } catch (err) {
+      previewBody.innerHTML = `<p style="color: var(--danger);">Could not read file: ${escapeHtml(err.message)}</p>`;
+    }
+  } else {
+    try {
+      const size = await getHandleSize(match.handle);
+      const metadata = document.createElement('div');
+      metadata.style.cssText = 'margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);';
+      metadata.innerHTML = `
+        <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px;">${match.path}</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim);">
+          <span style="font-family: var(--font-mono);">${formatSize(size)}</span>
+          • Directory
+        </div>
+      `;
+      previewBody.innerHTML = '';
+      previewBody.appendChild(metadata);
+
+      const children = [];
+      for await (const [name, handle] of match.handle.entries()) {
+        let childSize = null;
+        if (handle.kind === 'file') {
+          try {
+            const file = await handle.getFile();
+            childSize = file.size;
+          } catch { /* ignore size errors */ }
+        }
+        children.push({ name, kind: handle.kind, handle, size: childSize });
+        if (children.length >= 100) break;
+      }
+      if (children.length > 0) {
+        const ul = document.createElement('ul');
+        ul.className = 'preview-list';
+        ul.style.cssText = 'max-height: 300px; overflow-y: auto; list-style: none; margin: 0; padding: 0;';
+        
+        children.forEach(child => {
+          const li = document.createElement('li');
+          li.style.cssText = 'padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.15s;';
+          li.innerHTML = `
+            <span style="font-size: 0.9rem;">${child.kind === 'file' ? '📄' : '📁'}</span>
+            <span style="flex: 1; font-family: var(--font-mono); font-size: 0.8rem; word-break: break-all;">${escapeHtml(child.name)}</span>
+            ${child.size !== null ? `<span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim);">${formatSize(child.size)}</span>` : ''}
+          `;
+          li.addEventListener('mouseenter', () => li.style.background = 'var(--panel-2)');
+          li.addEventListener('mouseleave', () => li.style.background = 'transparent');
+          li.addEventListener('click', () => {
+            openPreview({ 
+              path: `${match.path}/${child.name}`, 
+              kind: child.kind, 
+              handle: child.handle,
+              size: child.size
+            });
+          });
+          ul.appendChild(li);
+        });
+        
+        previewBody.appendChild(ul);
+        if (children.length >= 100) {
+          const more = document.createElement('div');
+          more.style.cssText = 'color: var(--text-dim); font-size: 0.75rem; margin-top: 8px; font-style: italic;';
+          more.textContent = `Showing first 100 items — directory may contain more`;
+          previewBody.appendChild(more);
+        }
+      } else {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'color: var(--text-dim); font-size: 0.85rem; font-style: italic;';
+        empty.textContent = 'Empty directory';
+        previewBody.appendChild(empty);
+      }
+    } catch (err) {
+      previewBody.innerHTML = `<p style="color: var(--danger);">Could not read directory: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Clean tab: tech selection + scanning + nuking                          */
+/* ---------------------------------------------------------------------- */
+function selectedTechValues() {
+  return Array.from(techGrid.querySelectorAll('input[type=checkbox]'))
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
+}
+
+function targetNameSet() {
+  const vals = new Set(selectedTechValues());
+  const names = new Set();
+  CONFIG.forEach(tool => {
+    if (vals.has(tool.value)) tool.directories.forEach(d => names.add(d));
+  });
+  return names;
+}
+
+function renderTechGrid() {
+  techGrid.innerHTML = '';
+  CONFIG.forEach(tool => {
+    const label = document.createElement('label');
+    label.className = 'tech-option';
+    label.innerHTML = `
+      <input type="checkbox" value="${tool.value}" ${tool.value === 'node' ? 'checked' : ''} />
+      <span>
+        <span class="label">${tool.name}</span>
+        <span class="dirs">${tool.directories.join(', ')}</span>
+      </span>
+    `;
+    const input = label.querySelector('input');
+    const sync = () => label.classList.toggle('checked', input.checked);
+    input.addEventListener('change', sync);
+    sync();
+    techGrid.appendChild(label);
+  });
+}
+renderTechGrid();
+
+async function walk(dirHandle, path, targetNames, results) {
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (SKIP_DIRS.has(name)) continue;
+    if (targetNames.has(name)) {
+      results.push({ parentHandle: dirHandle, name, kind: handle.kind, path: `${path}/${name}`, handle });
+      continue;
+    }
+    if (handle.kind === 'directory') {
+      await walk(handle, `${path}/${name}`, targetNames, results);
+    }
+  }
+}
+
+function iconFor(kind) { return kind === 'file' ? '📄' : '📁'; }
+
+function renderResults() {
+  resultsList.innerHTML = '';
+  const resultsHeader = document.getElementById('results-header');
+  const resultsCount = document.getElementById('results-count');
+  const resultsSize = document.getElementById('results-size');
+  const selectAllBtn = document.getElementById('select-all-results');
+  const clearBtn = document.getElementById('clear-selection');
+
+  if (matches.length === 0) {
+    emptyNote.style.display = 'block';
+    nukeBtn.disabled = true;
+    nukeBtn.textContent = 'Move to Recycle Bin (0)';
+    resultsHeader.style.display = 'none';
+    if (selectAllBtn) selectAllBtn.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+    return;
+  }
+  emptyNote.style.display = 'none';
+  resultsHeader.style.display = 'flex';
+  resultsCount.textContent = matches.length;
+  if (selectAllBtn) selectAllBtn.style.display = 'inline-flex';
+  if (clearBtn) clearBtn.style.display = 'inline-flex';
+
+  const sizePromises = matches.map((m, i) => {
+    const row = document.createElement('div');
+    row.className = 'result-item';
+    const lastSlash = m.path.lastIndexOf('/');
+    const dirPart = m.path.slice(0, lastSlash + 1);
+    const basePart = m.path.slice(lastSlash + 1);
+    row.innerHTML = `
+      <input type="checkbox" data-idx="${i}" checked />
+      <span class="path">${iconFor(m.kind)} <span class="dir">${escapeHtml(dirPart)}</span><span class="base">${escapeHtml(basePart)}</span></span>
+      <span class="size" data-size-idx="${i}">…</span>
+      <button class="icon-btn" data-preview-idx="${i}" title="Preview before deleting">👁️</button>
+    `;
+    resultsList.appendChild(row);
+    return getHandleSize(m.handle).then(size => {
+      m.size = size;
+      const el = resultsList.querySelector(`[data-size-idx="${i}"]`);
+      if (el) el.textContent = formatSize(size);
+      return size;
+    });
+  });
+
+  Promise.all(sizePromises).then(sizes => {
+    const totalSize = sizes.reduce((a, b) => a + b, 0);
+    resultsSize.textContent = formatSize(totalSize) + ' reclaimable';
+  });
+
+  resultsList.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', updateNukeButton);
+  });
+  resultsList.querySelectorAll('[data-preview-idx]').forEach(btn => {
+    btn.addEventListener('click', () => openPreview(matches[Number(btn.dataset.previewIdx)]));
+  });
+
+  updateNukeButton();
+}
+
+function updateNukeButton() {
+  const checked = resultsList.querySelectorAll('input[type=checkbox]:checked').length;
+  const total = resultsList.querySelectorAll('input[type=checkbox]').length;
+  nukeBtn.disabled = checked === 0;
+  nukeBtn.textContent = `Move to Recycle Bin (${checked})`;
+
+  const selectAllBtn = document.getElementById('select-all-results');
+  const clearBtn = document.getElementById('clear-selection');
+
+  if (total > 0) {
+    selectAllBtn.style.display = 'inline-flex';
+    clearBtn.style.display = 'inline-flex';
+    selectAllBtn.textContent = checked === total ? 'All Selected' : 'Select All';
+  } else {
+    selectAllBtn.style.display = 'none';
+    clearBtn.style.display = 'none';
+  }
+}
+
+async function refreshProjectSize() {
+  if (!rootHandle) return null;
+  sizeStatus.style.display = 'flex';
+  sizeStatusText.textContent = 'Calculating project size…';
+  const size = await getHandleSize(rootHandle);
+  sizeStatus.style.display = 'none';
+  projectStats.style.display = 'flex';
+  projectSizeVal.textContent = formatSize(size);
+  return size;
+}
+
+async function runScan() {
+  if (!rootHandle) return;
+  resultsCard.style.display = 'block';
+  summaryCard.style.display = 'none';
+  scanStatus.style.display = 'flex';
+  scanStatusText.textContent = 'Scanning…';
+  resultsList.innerHTML = '';
+  emptyNote.style.display = 'none';
+  nukeBtn.disabled = true;
+
+  const targetNames = targetNameSet();
+  matches = [];
+  try {
+    await walk(rootHandle, rootHandle.name, targetNames, matches);
+  } catch (err) {
+    scanStatusText.textContent = `Scan error: ${err.message}`;
+    scanStatus.style.display = 'flex';
+    return;
+  }
+  scanStatus.style.display = 'none';
+  renderResults();
+}
+
+pickBtn.addEventListener('click', async () => {
+  try {
+    rootHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    folderChosenEl.style.display = 'flex';
+    folderChosenEl.textContent = `📂 ${rootHandle.name}`;
+    rescanBtn.style.display = 'inline-block';
+    appTabs.style.display = 'block';
+    await refreshProjectSize();
+    await runScan();
+    await refreshTrashView();
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      alert(`Could not open folder: ${err.message}`);
+    }
+  }
+});
+
+rescanBtn.addEventListener('click', async () => {
+  await refreshProjectSize();
+  await runScan();
+});
+techGrid.addEventListener('change', () => { if (rootHandle) runScan(); });
+
+document.getElementById('select-all-results')?.addEventListener('click', () => {
+  resultsList.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = true);
+  updateNukeButton();
+});
+
+document.getElementById('clear-selection')?.addEventListener('click', () => {
+  resultsList.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+  updateNukeButton();
+});
+
+nukeBtn.addEventListener('click', () => {
+  const checkedIdx = Array.from(resultsList.querySelectorAll('input[type=checkbox]:checked'))
+    .map(cb => Number(cb.dataset.idx));
+  if (checkedIdx.length === 0) return;
+  openConfirmModal({
+    title: 'Move to Recycle Bin?',
+    text: `This will move ${checkedIdx.length} item${checkedIdx.length === 1 ? '' : 's'} into the Recycle Bin. You can restore them later from the Recycle Bin tab.`,
+    onConfirm: async () => {
+      const sizeBefore = await getHandleSize(rootHandle);
+      let freedBytes = 0, freedCount = 0;
+      resultLog.innerHTML = '';
+      const toRemove = checkedIdx.map(i => matches[i]);
+
+      for (const m of toRemove) {
+        try {
+          await moveToTrash(m);
+          freedBytes += m.size || 0;
+          freedCount++;
+          const line = document.createElement('div');
+          line.className = 'log-line';
+          line.innerHTML = `<span class="ok">✔</span><span class="path">Moved ${escapeHtml(m.path)} to Recycle Bin</span>`;
+          resultLog.appendChild(line);
+        } catch (err) {
+          const line = document.createElement('div');
+          line.className = 'log-line';
+          line.innerHTML = `<span class="err">✘</span><span class="path">Failed on ${escapeHtml(m.path)} — ${escapeHtml(err.message)}</span>`;
+          resultLog.appendChild(line);
+        }
+      }
+
+      const sizeAfter = await getHandleSize(rootHandle);
+      freedSizeEl.textContent = formatSize(freedBytes);
+      freedCountEl.textContent = String(freedCount);
+      sizeBeforeVal.textContent = formatSize(sizeBefore);
+      sizeAfterVal.textContent = formatSize(sizeAfter);
+      summaryCard.style.display = 'block';
+      projectSizeVal.textContent = formatSize(sizeAfter);
+      await runScan();
+      await refreshTrashView();
+    },
+  });
+});
+
+if (!('showDirectoryPicker' in window)) {
+  compatBanner.classList.add('show');
+  pickBtn.disabled = true;
+}
+
+/* ---------------------------------------------------------------------- */
+/* GitHub Upload tab                                                      */
+/* ---------------------------------------------------------------------- */
+function ghLogLine(kind, text) {
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  const cls = kind === 'ok' ? 'ok' : kind === 'err' ? 'err' : 'info';
+  const glyph = kind === 'ok' ? '✔' : kind === 'err' ? '✘' : '…';
+  line.innerHTML = `<span class="${cls}">${glyph}</span><span class="path">${escapeHtml(text)}</span>`;
+  ghLog.appendChild(line);
+  ghLog.scrollTop = ghLog.scrollHeight;
+}
+
+async function scanForUpload(dirHandle, relPath, out) {
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind === 'directory') {
+      if (IGNORE_DIR_NAMES.has(name)) continue;
+      await scanForUpload(handle, relPath ? `${relPath}/${name}` : name, out);
+    } else {
+      if (IGNORE_FILE_NAMES.has(name)) continue;
+      const filePath = relPath ? `${relPath}/${name}` : name;
+      out.push({ handle, path: filePath, name, sensitive: isSensitiveName(name) });
+    }
+  }
+}
+
+function renderUploadFiles(filterText = '') {
+  const needle = filterText.trim().toLowerCase();
+  ghFileList.innerHTML = '';
+  const visible = uploadFiles.filter(f => !needle || f.path.toLowerCase().includes(needle));
+
+  visible.forEach(f => {
+    const hasContentSecrets = (f.contentMatches && f.contentMatches.length > 0);
+    const isEdited = editedContents.has(f.path);
+    const row = document.createElement('div');
+    row.className = 'file-row';
+    row.innerHTML = `
+      <input type="checkbox" ${f.selected ? 'checked' : ''} />
+      <span class="path">${escapeHtml(f.path)}</span>
+      ${f.sensitive ? '<span class="badge badge-warn">Looks sensitive</span>' : ''}
+      ${hasContentSecrets ? '<span class="badge badge-warn">🔑 Secrets in content</span>' : ''}
+      ${isEdited ? '<span class="badge badge-muted">✎ Edited</span>' : ''}
+      <button class="icon-btn" data-edit-path="${escapeHtml(f.path)}" title="View / edit this file before uploading">✏️</button>
+    `;
+    row.querySelector('input').addEventListener('change', e => {
+      f.selected = e.target.checked;
+      updateUploadCounts();
+    });
+    row.querySelector('[data-edit-path]').addEventListener('click', () => openEditModal(f));
+    ghFileList.appendChild(row);
+  });
+
+  if (visible.length === 0) {
+    ghFileList.innerHTML = '<div class="empty-note">No files match that filter.</div>';
+  }
+}
+
+function updateUploadCounts() {
+  const selected = uploadFiles.filter(f => f.selected).length;
+  ghSelectedCount.textContent = String(selected);
+  ghTotalCount.textContent = String(uploadFiles.length);
+  ghFlaggedCount.textContent = String(uploadFiles.filter(f => f.sensitive).length);
+  ghContentFlaggedCount.textContent = String(uploadFiles.filter(f => f.contentMatches && f.contentMatches.length > 0).length);
+  ghEditedCount.textContent = String(uploadFiles.filter(f => editedContents.has(f.path)).length);
+  ghUploadBtn.disabled = selected === 0;
+}
+
+ghScanBtn.addEventListener('click', async () => {
+  if (!rootHandle) {
+    alert('Choose a project folder at the top of the page first.');
+    return;
+  }
+  ghScanStatus.style.display = 'flex';
+  ghScanStatusText.textContent = 'Scanning files…';
+  ghFilesSection.style.display = 'none';
+  ghUploadCard.style.display = 'none';
+  uploadFiles = [];
+  editedContents.clear();
+  try {
+    const found = [];
+    await scanForUpload(rootHandle, '', found);
+    uploadFiles = found.map(f => ({ ...f, selected: !f.sensitive, contentMatches: [] }));
+
+    // Second pass: peek inside each small, text-like file for hardcoded
+    // secrets/credentials so a normal-looking file (e.g. a seed script
+    // with an admin password) still gets flagged, not just files whose
+    // *name* looks sensitive.
+    ghScanStatusText.textContent = `Checking file contents for secrets… (0/${uploadFiles.length})`;
+    let checked = 0;
+    for (const f of uploadFiles) {
+      checked++;
+      if (checked % 15 === 0) {
+        ghScanStatusText.textContent = `Checking file contents for secrets… (${checked}/${uploadFiles.length})`;
+        await new Promise(r => setTimeout(r, 0)); // let the UI breathe
+      }
+      try {
+        const { text, tooLarge, binary } = await readTextIfScannable(f.handle);
+        if (!tooLarge && !binary && text != null) {
+          f.contentMatches = findContentSecrets(text);
+          if (f.contentMatches.length > 0) f.selected = false; // flagged content also unchecks by default
+        }
+      } catch { /* unreadable file — skip content scan for it */ }
+    }
+  } catch (err) {
+    alert(`Could not scan project: ${err.message}`);
+  }
+  ghScanStatus.style.display = 'none';
+  ghFilesSection.style.display = 'block';
+  ghUploadCard.style.display = 'block';
+  ghLog.innerHTML = '';
+  renderUploadFiles(ghFilter.value);
+  updateUploadCounts();
+});
+
+/* ---------------------------------------------------------------------- */
+/* Edit File modal: view/redact a file's content before it's uploaded      */
+/* ---------------------------------------------------------------------- */
+let editingFile = null;
+
+async function openEditModal(f) {
+  editingFile = f;
+  editTitle.textContent = f.path;
+  editSaveLocal.checked = false;
+  editFlags.innerHTML = '<p style="color:var(--text-dim); font-size:0.85rem;">Loading…</p>';
+  editTextarea.value = '';
+  editModal.classList.add('show');
+
+  let text;
+  if (editedContents.has(f.path)) {
+    text = editedContents.get(f.path);
+  } else {
+    const { text: original, tooLarge, binary } = await readTextIfScannable(f.handle);
+    if (tooLarge) {
+      editFlags.innerHTML = '<p style="color:var(--text-dim); font-size:0.85rem;">This file is too large to edit here — upload or exclude it as-is.</p>';
+      editTextarea.style.display = 'none';
+      return;
+    }
+    if (binary) {
+      editFlags.innerHTML = '<p style="color:var(--text-dim); font-size:0.85rem;">This is a binary file — editing isn\'t available.</p>';
+      editTextarea.style.display = 'none';
+      return;
+    }
+    text = original || '';
+  }
+  editTextarea.style.display = 'block';
+  editTextarea.value = text;
+  renderEditFlags();
+}
+
+function renderEditFlags() {
+  const matches = findContentSecrets(editTextarea.value);
+  if (matches.length === 0) {
+    editFlags.innerHTML = '<p style="color:var(--text-dim); font-size:0.85rem;">No obvious secrets detected in the current text.</p>';
+    return;
+  }
+  editFlags.innerHTML = `
+    <p style="color:var(--warn); font-size:0.85rem; margin-bottom:8px;">⚠️ ${matches.length} line(s) look like credentials or keys:</p>
+    <ul class="preview-list">
+      ${matches.map(m => `<li>Line ${m.lineNum} — ${escapeHtml(m.label)}</li>`).join('')}
+    </ul>
+  `;
+}
+
+editTextarea.addEventListener('input', renderEditFlags);
+
+editRedactAllBtn.addEventListener('click', () => {
+  editTextarea.value = redactAllContentSecrets(editTextarea.value);
+  renderEditFlags();
+});
+
+editResetBtn.addEventListener('click', async () => {
+  if (!editingFile) return;
+  const { text } = await readTextIfScannable(editingFile.handle);
+  editTextarea.value = text || '';
+  renderEditFlags();
+});
+
+editCancelBtn.addEventListener('click', () => {
+  editModal.classList.remove('show');
+  editingFile = null;
+});
+
+editSaveBtn.addEventListener('click', async () => {
+  if (!editingFile) return;
+  const newText = editTextarea.value;
+  editedContents.set(editingFile.path, newText);
+  editingFile.contentMatches = findContentSecrets(newText);
+
+  if (editSaveLocal.checked) {
+    try {
+      const writable = await editingFile.handle.createWritable();
+      await writable.write(newText);
+      await writable.close();
+      ghLogLine('ok', `Also saved changes to your local file: ${editingFile.path}`);
+    } catch (err) {
+      alert(`Saved for upload, but could not write the local file: ${err.message}`);
+    }
+  }
+
+  editModal.classList.remove('show');
+  editingFile = null;
+  renderUploadFiles(ghFilter.value);
+  updateUploadCounts();
+});
+
+ghFilter.addEventListener('input', () => renderUploadFiles(ghFilter.value));
+ghSelectAll.addEventListener('click', () => {
+  const needle = ghFilter.value.trim().toLowerCase();
+  uploadFiles.forEach(f => { if (!needle || f.path.toLowerCase().includes(needle)) f.selected = true; });
+  renderUploadFiles(ghFilter.value);
+  updateUploadCounts();
+});
+ghSelectNone.addEventListener('click', () => {
+  const needle = ghFilter.value.trim().toLowerCase();
+  uploadFiles.forEach(f => { if (!needle || f.path.toLowerCase().includes(needle)) f.selected = false; });
+  renderUploadFiles(ghFilter.value);
+  updateUploadCounts();
+});
+
+function parseRepoUrl(url) {
+  const cleaned = url.trim().replace(/\.git$/i, '');
+  const m = cleaned.match(/github\.com[/:]+([^/]+)\/([^/]+)\/?$/i);
+  if (!m) throw new Error('Could not find a github.com owner/repo in that URL.');
+  return { owner: m[1], repo: m[2] };
+}
+
+async function githubRequest(path, token, opts = {}) {
+  const res = await fetch(`https://api.github.com${path}`, {
+    ...opts,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+    },
+  });
+  if (!res.ok) {
+    let detail = '';
+    try { detail = (await res.json()).message || ''; } catch { /* ignore */ }
+    throw new Error(`${res.status} ${res.statusText}${detail ? ` — ${detail}` : ''}`);
+  }
+  return res.json();
+}
+
+/** Base64-encode a file for upload — using any saved edit in place of the
+ *  original content on disk, if the user edited this file in the modal. */
+async function fileToBase64(f) {
+  if (editedContents.has(f.path)) {
+    return textToBase64(editedContents.get(f.path));
+  }
+  const file = await f.handle.getFile();
+  const buf = new Uint8Array(await file.arrayBuffer());
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < buf.length; i += chunkSize) {
+    binary += String.fromCharCode(...buf.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+ghUploadBtn.addEventListener('click', async () => {
+  const token = ghTokenInput.value.trim();
+  const repoUrl = ghRepoUrlInput.value.trim();
+  const branch = ghBranchInput.value.trim() || 'main';
+  const message = ghMessageInput.value.trim() || 'Upload via Nukelear Web';
+  const files = uploadFiles.filter(f => f.selected);
+
+  ghLog.innerHTML = '';
+
+  if (!token) return ghLogLine('err', 'Enter a GitHub personal access token first.');
+  if (files.length === 0) return ghLogLine('err', 'Select at least one file to upload.');
+
+  let owner, repo;
+  try {
+    ({ owner, repo } = parseRepoUrl(repoUrl));
+  } catch (err) {
+    return ghLogLine('err', err.message);
+  }
+
+  const flaggedSelected = files.filter(f =>
+    f.sensitive || (f.contentMatches && f.contentMatches.length > 0 && !editedContents.has(f.path))
+  );
+  if (flaggedSelected.length > 0) {
+    const proceed = confirm(
+      `${flaggedSelected.length} file(s) look like they contain secrets/API keys/credentials and are still checked for upload:\n\n` +
+      flaggedSelected.map(f => ` - ${f.path}`).join('\n') +
+      `\n\nUpload them to GitHub anyway? Click Cancel to go back and edit or uncheck them first.`
+    );
+    if (!proceed) return ghLogLine('info', 'Upload cancelled — edit (✏️) or uncheck the flagged files above and try again.');
+  }
+
+  ghUploadBtn.disabled = true;
+  try {
+    ghLogLine('info', `Looking up ${owner}/${repo}@${branch}…`);
+    const refData = await githubRequest(`/repos/${owner}/${repo}/git/refs/heads/${branch}`, token);
+    const latestCommitSha = refData.object.sha;
+    const latestCommit = await githubRequest(`/repos/${owner}/${repo}/git/commits/${latestCommitSha}`, token);
+    const baseTreeSha = latestCommit.tree.sha;
+
+    ghLogLine('info', `Uploading ${files.length} file${files.length === 1 ? '' : 's'}…`);
+    const treeEntries = [];
+    let done = 0;
+    for (const f of files) {
+      const content = await fileToBase64(f);
+      const blob = await githubRequest(`/repos/${owner}/${repo}/git/blobs`, token, {
+        method: 'POST',
+        body: JSON.stringify({ content, encoding: 'base64' }),
+      });
+      treeEntries.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha });
+      done++;
+      ghLogLine('ok', `${f.path} (${done}/${files.length})`);
+    }
+
+    ghLogLine('info', 'Creating tree…');
+    const tree = await githubRequest(`/repos/${owner}/${repo}/git/trees`, token, {
+      method: 'POST',
+      body: JSON.stringify({ base_tree: baseTreeSha, tree: treeEntries }),
+    });
+
+    ghLogLine('info', 'Creating commit…');
+    const commit = await githubRequest(`/repos/${owner}/${repo}/git/commits`, token, {
+      method: 'POST',
+      body: JSON.stringify({ message, tree: tree.sha, parents: [latestCommitSha] }),
+    });
+
+    ghLogLine('info', 'Updating branch ref…');
+    await githubRequest(`/repos/${owner}/${repo}/git/refs/heads/${branch}`, token, {
+      method: 'PATCH',
+      body: JSON.stringify({ sha: commit.sha }),
+    });
+
+    ghLogLine('ok', `Done — pushed commit ${commit.sha.slice(0, 7)} to ${branch}.`);
+  } catch (err) {
+    ghLogLine('err', err.message);
+  } finally {
+    ghUploadBtn.disabled = files.length === 0;
+  }
+});
+</script>
+</body>
+</html>
